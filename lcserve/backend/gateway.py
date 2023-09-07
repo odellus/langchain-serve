@@ -31,7 +31,8 @@ from jina.serve.runtimes.gateway.http.fastapi import FastAPIBaseGateway
 from opentelemetry.trace import get_current_span
 from pydantic import BaseModel, Field, ValidationError, create_model
 from starlette.types import ASGIApp, Receive, Scope, Send
-from starlette.middleware.cors import CORSMiddleware
+# from starlette.middleware import Middleware
+from fastapi.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosed
 
 from .langchain_helper import (
@@ -118,15 +119,17 @@ class LangchainFastAPIGateway(FastAPIBaseGateway):
         from docarray import Document, DocumentArray
         from fastapi import Body, FastAPI
 
+        # middleware = [Middleware(CORSMiddleware, allow_origins=['*'])]
+        # app = FastAPI(middleware=middleware)
         app = FastAPI()
+        print('Adding the god damn middlewear')
         app.add_middleware(
-            CORSMiddleware,
-            allow_origins=['*'],
-            allow_credentials=True,
-            allow_methods=['*'],
-            allow_headers=['*'],
+                CORSMiddleware,
+                allow_origins=['*'],
+                allow_credentials=True,
+                allow_methods=['*'],
+                allow_headers=['*'],
         )
-
         @app.post("/run")
         async def __run(
             text: str = Body(
@@ -296,6 +299,7 @@ class ServingGateway(FastAPIBaseGateway):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        print('Initializing ServingGateway')
         self._modules = modules
         self._fastapi_app_str = fastapi_app_str
         self._lcserve_app = lcserve_app
@@ -332,17 +336,24 @@ class ServingGateway(FastAPIBaseGateway):
                 self._app = FastAPI()
 
     def _configure_cors(self):
-        if self.cors:
-            self.logger.info('Enabling CORS')
-            from fastapi.middleware.cors import CORSMiddleware
+        self.logger.info('Enabling CORS')
+        from fastapi.middleware.cors import CORSMiddleware
+        print('Fucking CORS is turned on god dammit!')
+        origins = [
+            'http://localhost:8000',
+            'http://localhost:8001',
+            'http://localhost:8002',
+            'http://localhost:3000',
+            'http://localhost:3001'
 
-            self._app.add_middleware(
-                CORSMiddleware,
-                allow_origins=['*'],
-                allow_credentials=True,
-                allow_methods=['*'],
-                allow_headers=['*'],
-            )
+        ]
+        self._app.add_middleware(
+            CORSMiddleware,
+            allow_origins=origins,
+            allow_credentials=True,
+            allow_methods=['*'],
+            allow_headers=['*'],
+        )
 
     def _setup_metrics(self):
         from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
