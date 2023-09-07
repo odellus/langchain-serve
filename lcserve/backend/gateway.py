@@ -31,8 +31,8 @@ from jina.serve.runtimes.gateway.http.fastapi import FastAPIBaseGateway
 from opentelemetry.trace import get_current_span
 from pydantic import BaseModel, Field, ValidationError, create_model
 from starlette.types import ASGIApp, Receive, Scope, Send
+from starlette.middleware.cors import CORSMiddleware
 from websockets.exceptions import ConnectionClosed
-from fastapi.middleware.cors import CORSMiddleware
 
 from .langchain_helper import (
     AsyncStreamingWebsocketCallbackHandler,
