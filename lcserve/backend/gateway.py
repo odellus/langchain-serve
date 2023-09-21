@@ -343,14 +343,16 @@ class ServingGateway(FastAPIBaseGateway):
             'http://localhost:8000',
             'http://localhost:8001',
             'http://localhost:8002',
+            '*',
             'http://localhost:3000',
-            'http://localhost:3001'
+            'http://localhost:3001',
+            'https://dev.optx.com/',
 
         ]
         self._app.add_middleware(
             CORSMiddleware,
-            allow_origins=origins,
-            allow_credentials=True,
+            allow_origins=['*'],
+            allow_credentials=False,
             allow_methods=['*'],
             allow_headers=['*'],
         )
